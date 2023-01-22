@@ -1,5 +1,6 @@
 import Service from "./Service";
 import DAL from "../dal/DAL";
+import User from "../models/user";
 
 class UsersService implements Service {
     private userDal: DAL;
@@ -9,8 +10,11 @@ class UsersService implements Service {
     }
 
     async getAll() {
-        const users = await this.userDal.find();
-        return users;
+        return this.userDal.find();
+    }
+
+    async getByUuid(id: string) {
+        return await this.userDal.getByUuid(id);
     }
 }
 

@@ -12,5 +12,16 @@ export default (usersService: UsersService) => {
         });
     });
 
+    usersRouter.get('/:uuid', async (req: Request, resp: Response) => {
+        const { uuid } = req.params;
+        const user = await usersService.getByUuid(uuid);
+
+        resp.json({
+            data: [
+                user
+            ]
+        });
+    })
+
     return usersRouter;
 }

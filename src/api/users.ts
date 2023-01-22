@@ -1,9 +1,16 @@
 import { Router, Request, Response } from "express";
+import usersService from "../services/UsersService";
+import UsersService from "../services/UsersService";
 
-const usersRouter = Router();
+export default (usersService: UsersService) => {
+    const usersRouter = Router();
 
-usersRouter.get('/', (req: Request, resp: Response) => {
-    resp.sendStatus(200);
-});
+    usersRouter.get('/', async (req: Request, resp: Response) => {
+        const users = await usersService.getAll();
+        resp.json({
+            data: users
+        });
+    });
 
-export default usersRouter;
+    return usersRouter;
+}

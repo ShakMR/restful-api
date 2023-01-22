@@ -1,8 +1,13 @@
 import { Router } from "express";
 import users from "./users";
+import Service from "../services/Service";
+import { APIConfig } from "../config";
+import UsersService from "../services/UsersService";
 
-const apiRouter = Router();
+export default (services: { usersService: UsersService }, config: APIConfig): Router => {
+    const apiRouter = Router();
 
-apiRouter.use('/users', users);
+    apiRouter.use('/users', users(services.usersService));
 
-export default apiRouter;
+    return apiRouter;
+};

@@ -1,7 +1,7 @@
 import { Exclude } from 'class-transformer';
 import { IsNotEmpty } from 'class-validator';
 import { MediaDTO } from '../../../media/media.module';
-import { ApiProperty } from "@nestjs/swagger";
+import { ApiProperty } from '@nestjs/swagger';
 
 export class PostDTO {
   @Exclude()
@@ -22,3 +22,11 @@ export class PostDTO {
     Object.assign(this, partial);
   }
 }
+
+export type HateoasPost = PostDTO & {
+  _links: {
+    self: string;
+    media: string;
+    posts: string;
+  };
+};

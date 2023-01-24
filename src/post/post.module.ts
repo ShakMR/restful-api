@@ -3,6 +3,7 @@ import { PostService } from './services/post.service';
 import { PostMockRepository } from './repository/post-mock.repository';
 import { PostController } from './controller/post.controller';
 import { MediaModule } from '../media/media.module';
+import PostTransformer from './controller/transformers/post.transformer';
 
 @Module({
   imports: [MediaModule],
@@ -15,8 +16,11 @@ import { MediaModule } from '../media/media.module';
       provide: 'PostService',
       useClass: PostService,
     },
+    {
+      provide: 'PostTransformer',
+      useClass: PostTransformer,
+    },
   ],
-  // exports: [PostService],
   controllers: [PostController],
 })
 export class PostModule {}

@@ -15,14 +15,18 @@ import {
 } from '@nestjs/common';
 import { PostServiceInterface } from '../services/post-service.interface';
 import { ApiResponse } from '../../types/api';
-import { PostDTO } from './dto/post';
+import { PostDTO, HateoasPost } from './dto/post';
 import { MediaDTO } from '../../media/controller/dto/media';
-import { ApiTags } from "@nestjs/swagger";
+import { ApiTags } from '@nestjs/swagger';
+import PostTransformer from './transformers/post.transformer';
 
 @ApiTags('posts')
 @Controller('posts')
 export class PostController {
-  constructor(@Inject('PostService') private service: PostServiceInterface) {}
+  constructor(
+    @Inject('PostService') private service: PostServiceInterface,
+    @Inject('PostTransformer') private transformer: PostTransformer,
+  ) {}
 
   @UseInterceptors(ClassSerializerInterceptor)
   @Get()
@@ -30,16 +34,13 @@ export class PostController {
     @Query('search') search: string,
     @Query('exclude') exclude: 'media',
   ): Promise<ApiResponse<PostDTO[]>> {
+    const posts = await this.service.getAll({
+      search,
+      includeMedia: !exclude || exclude !== 'media',
+    });
+
     return {
-      data: (
-        await this.service.getAll({
-          search,
-          includeMedia: !exclude || exclude !== 'media',
-        })
-      ).map((p) => {
-        const transformedMedia = p.media.map((m) => new MediaDTO(m));
-        return new PostDTO({ ...p, media: transformedMedia });
-      }),
+      data: this.transformer.toDTOCollection(posts),
       metadata: {},
     };
   }
@@ -49,7 +50,7 @@ export class PostController {
   async getOne(
     @Param('uuid') uuid: string,
     @Query('exclude') exclude?: 'media',
-  ): Promise<ApiResponse<PostDTO>> {
+  ): Promise<ApiResponse<HateoasPost>> {
     const post = await this.service.getByUuid(uuid, {
       includeMedia: !exclude || exclude !== 'media',
     });
@@ -67,10 +68,7 @@ export class PostController {
     }
 
     return {
-      data: new PostDTO({
-        ...post,
-        media: post.media.map((m) => new MediaDTO(m)),
-      }),
+      data: this.transformer.toDTO(post),
       metadata: {},
     };
   }

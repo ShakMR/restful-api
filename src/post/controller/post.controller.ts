@@ -1,12 +1,15 @@
 import {
   Body,
   ClassSerializerInterceptor,
-  Controller,
+  Controller, Delete,
   Get,
   HttpException,
   HttpStatus,
   Inject,
-  Param, Post, Query,
+  Param,
+  Post,
+  Put,
+  Query,
   UseInterceptors
 } from "@nestjs/common";
 import { PostServiceInterface } from '../services/post-service.interface';
@@ -19,7 +22,9 @@ export class PostController {
 
   @UseInterceptors(ClassSerializerInterceptor)
   @Get()
-  async getAll(@Query('search') search: string): Promise<ApiResponse<PostDTO[]>> {
+  async getAll(
+    @Query('search') search: string,
+  ): Promise<ApiResponse<PostDTO[]>> {
     return {
       data: (await this.service.getAll(search)).map((p) => new PostDTO(p)),
       metadata: {},
@@ -56,6 +61,60 @@ export class PostController {
 
     return {
       data: new PostDTO(post),
+      metadata: {},
+    };
+  }
+
+  @UseInterceptors(ClassSerializerInterceptor)
+  @Put(':uuid')
+  async update(@Param('uuid') uuid: string, @Body() postDTO: Partial<PostDTO>) {
+    const existentPost = await this.service.getByUuid(uuid);
+
+    if (!existentPost) {
+      throw new HttpException(
+        {
+          code: 'ERR-1',
+          status: `${HttpStatus.NOT_FOUND}`,
+          title: 'Not found',
+          details: "The Post requested couldn't be found",
+        },
+        HttpStatus.NOT_FOUND,
+      );
+    }
+
+    const updatedPost = {
+      ...existentPost,
+      ...postDTO,
+    };
+
+    await this.service.update(updatedPost);
+
+    return {
+      data: new PostDTO(updatedPost),
+      metadata: {},
+    };
+  }
+  @UseInterceptors(ClassSerializerInterceptor)
+  @Delete(':uuid')
+  async delete(@Param('uuid') uuid: string) {
+    const existentPost = await this.service.getByUuid(uuid);
+
+    if (!existentPost) {
+      throw new HttpException(
+        {
+          code: 'ERR-1',
+          status: `${HttpStatus.NOT_FOUND}`,
+          title: 'Not found',
+          details: "The Post requested couldn't be found",
+        },
+        HttpStatus.NOT_FOUND,
+      );
+    }
+
+    this.service.delete(existentPost);
+
+    return {
+      data: {},
       metadata: {},
     };
   }

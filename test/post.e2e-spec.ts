@@ -71,4 +71,62 @@ describe('PostsController (e2e)', () => {
       });
     });
   });
+
+  describe('/posts/00000000-0000-0000-000000000001 (PUT)', () => {
+    it('should succeed', async () => {
+      const resp = await request(app.getHttpServer())
+        .put('/posts/00000000-0000-0000-0000-000000000001')
+        .send({
+          title: 'test post',
+        })
+        .expect(200);
+
+      expect(resp.body.data).toEqual({
+        uuid: '00000000-0000-0000-0000-000000000001',
+        title: 'test post',
+        description: 'This is my post about my trip to Africa',
+      });
+    });
+
+    it("should error if uuid doesn't exist", async () => {
+      const resp = await request(app.getHttpServer())
+        .put('/posts/00000000-0000-0000-000000000010')
+        .send({})
+        .expect(404);
+
+      console.log(resp.body);
+      expect(resp.body.errors).toEqual({
+        code: 'ERR-1',
+        details: "The Post requested couldn't be found",
+        status: '404',
+        title: 'Not found',
+      });
+    });
+  });
+
+  describe('/posts/00000000-0000-0000-000000000001 (DELETE)', () => {
+    it('should succeed', async () => {
+      const resp = await request(app.getHttpServer())
+        .delete('/posts/00000000-0000-0000-0000-000000000001')
+        .send()
+        .expect(200);
+
+      expect(resp.body.data).toEqual({});
+    });
+
+    it("should error if uuid doesn't exist", async () => {
+      const resp = await request(app.getHttpServer())
+        .put('/posts/00000000-0000-0000-000000000010')
+        .send()
+        .expect(404);
+
+      console.log(resp.body);
+      expect(resp.body.errors).toEqual({
+        code: 'ERR-1',
+        details: "The Post requested couldn't be found",
+        status: '404',
+        title: 'Not found',
+      });
+    });
+  });
 });

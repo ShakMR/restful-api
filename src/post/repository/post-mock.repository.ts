@@ -51,4 +51,15 @@ export class PostMockRepository implements PostRepositoryInterface {
     mockedPosts.push(post);
     return post;
   }
+
+  async update(id: number, post: Post): Promise<Post> {
+    const position = mockedPosts.findIndex((p) => p.id === id);
+    mockedPosts[position] = post;
+    return post;
+  }
+
+  async delete(id: number): Promise<void> {
+    const position = mockedPosts.findIndex((p) => p.id === id);
+    mockedPosts.splice(position, 1);
+  }
 }

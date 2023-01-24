@@ -7,4 +7,8 @@ export abstract class PostServiceInterface {
   abstract getByUuid(uuid: string): Promise<Post | undefined>;
 
   abstract create(post: PostDTO): Promise<Post>;
+
+  abstract update(post: Post): Promise<Post>;
+
+  abstract delete(post: Post);
 }

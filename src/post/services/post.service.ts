@@ -32,4 +32,12 @@ export class PostService implements PostServiceInterface {
     };
     return this.postRepository.create(post);
   }
+
+  update(post: Post): Promise<Post> {
+    return this.postRepository.update(post.id, post);
+  }
+
+  delete(post: Post): Promise<void> {
+    return this.postRepository.delete(post.id);
+  }
 }

@@ -1,10 +1,14 @@
-import { Injectable } from '@nestjs/common';
+import { Inject, Injectable } from '@nestjs/common';
 import Post from '../../model/post';
 import { HateoasPost, PostDTO } from '../dto/post';
-import { MediaDTO } from '../../../media/controller/dto/media';
+import MediaTransformer from '../../../media/controller/transformers/media.transformer';
 
 @Injectable()
 class PostTransformer {
+  constructor(
+    @Inject('MediaTransformer') private mediaTransformer: MediaTransformer,
+  ) {}
+
   addLinks(postDto: PostDTO): HateoasPost {
     return {
       ...postDto,
@@ -19,7 +23,7 @@ class PostTransformer {
   toDTO(post: Post): HateoasPost {
     const postDTO = new PostDTO({
       ...post,
-      media: post.media.map((m) => new MediaDTO(m)),
+      media: this.mediaTransformer.toDTOCollection(post.media),
     });
 
     return this.addLinks(postDTO);

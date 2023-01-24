@@ -1,14 +1,16 @@
 import { Inject, Injectable } from '@nestjs/common';
-import { PostServiceInterface } from './post-service.interface';
+import { GetOptions, PostServiceInterface } from './post-service.interface';
 import Post from '../model/post';
 import { PostRepositoryInterface } from '../repository/post-repository.interface';
 import { PostDTO } from '../controller/dto/post';
 import { v4 as uuid } from 'uuid';
+import { MediaServiceInterface } from '../../media/services/media-service.interface';
 
 @Injectable()
 export class PostService implements PostServiceInterface {
   constructor(
     @Inject('PostRepository') private postRepository: PostRepositoryInterface,
+    @Inject('MediaService') private mediaService: MediaServiceInterface,
   ) {}
 
   async getAll(search?: string): Promise<Post[]> {
@@ -21,11 +23,22 @@ export class PostService implements PostServiceInterface {
     return posts;
   }
 
-  getByUuid(uuid: string): Promise<Post | undefined> {
-    return this.postRepository.getByUuid(uuid);
+  async getByUuid(
+    uuid: string,
+    options: GetOptions,
+  ): Promise<Post | undefined> {
+    const post = await this.postRepository.getByUuid(uuid);
+
+    if (!post || !options.includeMedia) {
+      return post;
+    }
+
+    post.media = await this.mediaService.getByPostId(post.id);
+
+    return post;
   }
 
-  create(postDTO: PostDTO): Promise<Post> {
+  create(postDTO: Post): Promise<Post> {
     const post = {
       ...postDTO,
       uuid: uuid(),

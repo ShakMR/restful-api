@@ -2,8 +2,10 @@ import { Module } from '@nestjs/common';
 import { PostService } from './services/post.service';
 import { PostMockRepository } from './repository/post-mock.repository';
 import { PostController } from './controller/post.controller';
+import { MediaModule } from '../media/media.module';
 
 @Module({
+  imports: [MediaModule],
   providers: [
     {
       provide: 'PostRepository',

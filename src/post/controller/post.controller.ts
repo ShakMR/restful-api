@@ -1,7 +1,8 @@
 import {
   Body,
   ClassSerializerInterceptor,
-  Controller, Delete,
+  Controller,
+  Delete,
   Get,
   HttpException,
   HttpStatus,
@@ -10,11 +11,12 @@ import {
   Post,
   Put,
   Query,
-  UseInterceptors
-} from "@nestjs/common";
+  UseInterceptors,
+} from '@nestjs/common';
 import { PostServiceInterface } from '../services/post-service.interface';
 import { ApiResponse } from '../../types/api';
 import { PostDTO } from './dto/post';
+import { MediaDTO } from '../../media/controller/dto/media';
 
 @Controller('posts')
 export class PostController {
@@ -26,15 +28,23 @@ export class PostController {
     @Query('search') search: string,
   ): Promise<ApiResponse<PostDTO[]>> {
     return {
-      data: (await this.service.getAll(search)).map((p) => new PostDTO(p)),
+      data: (await this.service.getAll(search)).map((p) => {
+        const transformedMedia = p.media.map((m) => new MediaDTO(m));
+        return new PostDTO({ ...p, media: transformedMedia });
+      }),
       metadata: {},
     };
   }
 
   @UseInterceptors(ClassSerializerInterceptor)
   @Get(':uuid')
-  async getOne(@Param('uuid') uuid: string): Promise<ApiResponse<PostDTO>> {
-    const post = await this.service.getByUuid(uuid);
+  async getOne(
+    @Param('uuid') uuid: string,
+    @Query('exclude') exclude?: 'media',
+  ): Promise<ApiResponse<PostDTO>> {
+    const post = await this.service.getByUuid(uuid, {
+      includeMedia: !exclude || exclude !== 'media',
+    });
 
     if (!post) {
       throw new HttpException(
@@ -49,14 +59,17 @@ export class PostController {
     }
 
     return {
-      data: new PostDTO(post),
+      data: new PostDTO({
+        ...post,
+        media: post.media.map((m) => new MediaDTO(m)),
+      }),
       metadata: {},
     };
   }
 
   @UseInterceptors(ClassSerializerInterceptor)
   @Post()
-  async create(@Body() postDTO: PostDTO) {
+  async create(@Body() postDTO: Omit<PostDTO, 'media'>) {
     const post = await this.service.create(postDTO);
 
     return {
@@ -67,8 +80,13 @@ export class PostController {
 
   @UseInterceptors(ClassSerializerInterceptor)
   @Put(':uuid')
-  async update(@Param('uuid') uuid: string, @Body() postDTO: Partial<PostDTO>) {
-    const existentPost = await this.service.getByUuid(uuid);
+  async update(
+    @Param('uuid') uuid: string,
+    @Body() postDTO: Partial<Omit<PostDTO, 'media'>>,
+  ) {
+    const existentPost = await this.service.getByUuid(uuid, {
+      includeMedia: false,
+    });
 
     if (!existentPost) {
       throw new HttpException(
@@ -94,10 +112,13 @@ export class PostController {
       metadata: {},
     };
   }
+
   @UseInterceptors(ClassSerializerInterceptor)
   @Delete(':uuid')
   async delete(@Param('uuid') uuid: string) {
-    const existentPost = await this.service.getByUuid(uuid);
+    const existentPost = await this.service.getByUuid(uuid, {
+      includeMedia: false,
+    });
 
     if (!existentPost) {
       throw new HttpException(

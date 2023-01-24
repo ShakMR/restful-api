@@ -34,6 +34,26 @@ describe('PostsController (e2e)', () => {
       uuid: '00000000-0000-0000-0000-000000000001',
       title: 'Travel through Africa',
       description: 'This is my post about my trip to Africa',
+      media: {
+        data: [
+          {
+            uuid: '00000000-0000-0000-1111-000000000001',
+            src: 'https://t1.ea.ltmcdn.com/es/posts/1/9/2/animales_de_africa_20291_orig.jpg',
+          },
+        ],
+      },
+    });
+  });
+
+  it('/posts/00000000-0000-0000-0000-000000000001 (GET)', async () => {
+    const resp = await request(app.getHttpServer())
+      .get('/posts/00000000-0000-0000-0000-000000000001?exclude=media')
+      .expect(200);
+
+    expect(resp.body.data).toEqual({
+      uuid: '00000000-0000-0000-0000-000000000001',
+      title: 'Travel through Africa',
+      description: 'This is my post about my trip to Africa',
     });
   });
 

@@ -1,5 +1,6 @@
 import { Exclude } from 'class-transformer';
 import { IsNotEmpty } from 'class-validator';
+import { MediaDTO } from '../../../media/media.module';
 
 export class PostDTO {
   @Exclude()
@@ -11,6 +12,8 @@ export class PostDTO {
 
   @IsNotEmpty()
   description: string;
+
+  media?: MediaDTO[];
 
   constructor(partial: Partial<PostDTO>) {
     Object.assign(this, partial);

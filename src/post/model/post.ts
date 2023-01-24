@@ -5,7 +5,6 @@ type Post = {
   uuid: string;
   title: string;
   description: string;
-
   media?: Media[];
 };
 

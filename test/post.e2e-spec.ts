@@ -38,7 +38,11 @@ describe('PostsController (e2e)', () => {
         data: [
           {
             uuid: '00000000-0000-0000-1111-000000000001',
-            src: 'https://t1.ea.ltmcdn.com/es/posts/1/9/2/animales_de_africa_20291_orig.jpg',
+            src: 'http://example/nigeria.png',
+          },
+          {
+            uuid: '00000000-0000-0000-1111-000000000002',
+            src: 'http://example/peru.png',
           },
         ],
       },

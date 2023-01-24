@@ -26,9 +26,15 @@ export class PostController {
   @Get()
   async getAll(
     @Query('search') search: string,
+    @Query('exclude') exclude: 'media',
   ): Promise<ApiResponse<PostDTO[]>> {
     return {
-      data: (await this.service.getAll(search)).map((p) => {
+      data: (
+        await this.service.getAll({
+          search,
+          includeMedia: !exclude || exclude !== 'media',
+        })
+      ).map((p) => {
         const transformedMedia = p.media.map((m) => new MediaDTO(m));
         return new PostDTO({ ...p, media: transformedMedia });
       }),

@@ -1,5 +1,9 @@
 import { Inject, Injectable } from '@nestjs/common';
-import { GetOptions, PostServiceInterface } from './post-service.interface';
+import {
+  GetAllOptions,
+  GetOptions,
+  PostServiceInterface,
+} from './post-service.interface';
 import Post from '../model/post';
 import { PostRepositoryInterface } from '../repository/post-repository.interface';
 import { PostDTO } from '../controller/dto/post';
@@ -13,11 +17,22 @@ export class PostService implements PostServiceInterface {
     @Inject('MediaService') private mediaService: MediaServiceInterface,
   ) {}
 
-  async getAll(search?: string): Promise<Post[]> {
-    const posts = await this.postRepository.find();
+  async getAll({ search, includeMedia }: GetAllOptions): Promise<Post[]> {
+    let posts = await this.postRepository.find();
 
     if (search) {
-      return posts.filter((post) => post.title.includes(search));
+      posts = posts.filter((post) => post.title.includes(search));
+    }
+
+    if (includeMedia) {
+      posts = await Promise.all(
+        posts.map(async (post) => {
+          return {
+            ...post,
+            media: await this.mediaService.getByPostId(post.id),
+          };
+        }),
+      );
     }
 
     return posts;

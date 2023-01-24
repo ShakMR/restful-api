@@ -5,8 +5,12 @@ export type GetOptions = {
   includeMedia: boolean;
 };
 
+export type GetAllOptions = GetOptions & {
+  search?: string;
+};
+
 export abstract class PostServiceInterface {
-  abstract getAll(search?: string): Promise<Post[]>;
+  abstract getAll(options: GetAllOptions): Promise<Post[]>;
 
   abstract getByUuid(
     uuid: string,

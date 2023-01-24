@@ -17,7 +17,9 @@ import { PostServiceInterface } from '../services/post-service.interface';
 import { ApiResponse } from '../../types/api';
 import { PostDTO } from './dto/post';
 import { MediaDTO } from '../../media/controller/dto/media';
+import { ApiTags } from "@nestjs/swagger";
 
+@ApiTags('posts')
 @Controller('posts')
 export class PostController {
   constructor(@Inject('PostService') private service: PostServiceInterface) {}
@@ -75,7 +77,7 @@ export class PostController {
 
   @UseInterceptors(ClassSerializerInterceptor)
   @Post()
-  async create(@Body() postDTO: Omit<PostDTO, 'media'>) {
+  async create(@Body() postDTO: PostDTO) {
     const post = await this.service.create(postDTO);
 
     return {

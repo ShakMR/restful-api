@@ -1,7 +1,9 @@
-import { Inject, Injectable } from "@nestjs/common";
+import { Inject, Injectable } from '@nestjs/common';
 import { PostServiceInterface } from './post-service.interface';
 import Post from '../model/post';
 import { PostRepositoryInterface } from '../repository/post-repository.interface';
+import { PostDTO } from '../controller/dto/post';
+import { v4 as uuid } from 'uuid';
 
 @Injectable()
 export class PostService implements PostServiceInterface {
@@ -9,11 +11,25 @@ export class PostService implements PostServiceInterface {
     @Inject('PostRepository') private postRepository: PostRepositoryInterface,
   ) {}
 
-  getAll(): Promise<Post[]> {
-    return this.postRepository.find();
+  async getAll(search?: string): Promise<Post[]> {
+    const posts = await this.postRepository.find();
+
+    if (search) {
+      return posts.filter((post) => post.title.includes(search));
+    }
+
+    return posts;
   }
 
   getByUuid(uuid: string): Promise<Post | undefined> {
     return this.postRepository.getByUuid(uuid);
+  }
+
+  create(postDTO: PostDTO): Promise<Post> {
+    const post = {
+      ...postDTO,
+      uuid: uuid(),
+    };
+    return this.postRepository.create(post);
   }
 }

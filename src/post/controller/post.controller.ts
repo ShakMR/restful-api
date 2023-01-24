@@ -1,25 +1,27 @@
 import {
+  Body,
   ClassSerializerInterceptor,
   Controller,
   Get,
   HttpException,
   HttpStatus,
   Inject,
-  Param, UseInterceptors
+  Param, Post, Query,
+  UseInterceptors
 } from "@nestjs/common";
 import { PostServiceInterface } from '../services/post-service.interface';
-import Post from '../model/post';
 import { ApiResponse } from '../../types/api';
-import { PostDTO } from "./dto/post";
+import { PostDTO } from './dto/post';
 
 @Controller('posts')
 export class PostController {
   constructor(@Inject('PostService') private service: PostServiceInterface) {}
 
+  @UseInterceptors(ClassSerializerInterceptor)
   @Get()
-  async getAll(): Promise<ApiResponse<PostDTO[]>> {
+  async getAll(@Query('search') search: string): Promise<ApiResponse<PostDTO[]>> {
     return {
-      data: (await this.service.getAll()).map(p => new PostDTO(p)),
+      data: (await this.service.getAll(search)).map((p) => new PostDTO(p)),
       metadata: {},
     };
   }
@@ -40,6 +42,17 @@ export class PostController {
         HttpStatus.NOT_FOUND,
       );
     }
+
+    return {
+      data: new PostDTO(post),
+      metadata: {},
+    };
+  }
+
+  @UseInterceptors(ClassSerializerInterceptor)
+  @Post()
+  async create(@Body() postDTO: PostDTO) {
+    const post = await this.service.create(postDTO);
 
     return {
       data: new PostDTO(post),

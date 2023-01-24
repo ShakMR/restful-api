@@ -1,13 +1,16 @@
-import { Exclude } from "class-transformer";
+import { Exclude } from 'class-transformer';
+import { IsNotEmpty } from 'class-validator';
 
 export class PostDTO {
   @Exclude()
   id: number;
 
-  uuid: string;
+  uuid?: string;
+  @IsNotEmpty()
   title: string;
+
+  @IsNotEmpty()
   description: string;
-  user: number;
 
   constructor(partial: Partial<PostDTO>) {
     Object.assign(this, partial);
